@@ -4,16 +4,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies and Koha from official apt repo
 RUN apt-get update && apt-get install -y \
-    wget gnupg2 curl apt-transport-https \
+    wget gnupg2 curl apt-transport-https openssl \
     && echo "deb [signed-by=/usr/share/keyrings/koha-keyring.gpg] https://debian.koha-community.org/koha 24.11 main" \
        > /etc/apt/sources.list.d/koha.list \
     && wget -qO- https://debian.koha-community.org/koha/gpg.asc \
        | gpg --dearmor > /usr/share/keyrings/koha-keyring.gpg \
     && apt-get update \
     && apt-get install -y koha-common \
+    && a2enmod rewrite headers proxy_http cgi \
     && apt-get clean
 
-# Inject our custom files
+# Inject our custom AMC license files
 COPY C4/Auth.pm /usr/share/koha/lib/C4/Auth.pm
 COPY admin/license.pl /usr/share/koha/intranet/cgi-bin/admin/license.pl
 COPY admin/license_expired.pl /usr/share/koha/intranet/cgi-bin/admin/license_expired.pl
@@ -24,6 +25,10 @@ COPY koha-tmpl/intranet-tmpl/prog/en/modules/admin/license_expired.tt \
 COPY koha-tmpl/intranet-tmpl/prog/js/vue/components/Islands/AdminMenu.vue \
      /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/js/vue/components/Islands/AdminMenu.vue
 
+# Copy and set up entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 80 8080
 
-CMD ["apache2ctl", "-D", "FOREGROUND"]
+CMD ["/entrypoint.sh"]
