@@ -11,25 +11,18 @@ services:
       - koha_db_data:/var/lib/mysql
 
   koha-app:
-    image: digibib/koha:latest
+    build: .
     container_name: koha_app
     depends_on:
       - koha-db
     ports:
-      - "3001:80"
-      - "4000:8080"
+      - "3001:80"      # OPAC
+      - "4000:8080"    # Staff Intranet
     environment:
       - KOHA_DBHOST=koha-db
-      - KOHA_ADMINUSER=admin
-      - KOHA_ADMINPASS=admin123
-    volumes:
-      # Mount ONLY our specific changed files into the container
-      - ./C4/Auth.pm:/usr/share/koha/lib/C4/Auth.pm
-      - ./admin/license.pl:/usr/share/koha/intranet/cgi-bin/admin/license.pl
-      - ./admin/license_expired.pl:/usr/share/koha/intranet/cgi-bin/admin/license_expired.pl
-      - ./koha-tmpl/intranet-tmpl/prog/en/modules/admin/license.tt:/usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/license.tt
-      - ./koha-tmpl/intranet-tmpl/prog/en/modules/admin/license_expired.tt:/usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/license_expired.tt
-      - ./koha-tmpl/intranet-tmpl/prog/js/vue/components/Islands/AdminMenu.vue:/usr/share/koha/intranet/htdocs/intranet-tmpl/prog/js/vue/components/Islands/AdminMenu.vue
+      - KOHA_DBNAME=koha_library
+      - KOHA_DBUSER=kohaadmin
+      - KOHA_DBPASS=koha_db_password
 
 volumes:
   koha_db_data:
