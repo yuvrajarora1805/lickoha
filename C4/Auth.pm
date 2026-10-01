@@ -852,6 +852,37 @@ sub checkauth {
     my $skip_csrf_check = $params->{skip_csrf_check} || 0;
     $type = 'opac' unless $type;
 
+    # INOUT AMC License Check (only for Intranet/Staff client)
+    if ($type eq 'intranet' && $template_name ne 'admin/license_expired.tt' && $template_name ne 'admin/license.tt') {
+        eval {
+            require LWP::UserAgent;
+            require JSON;
+            my $key = C4::Context->preference("InoutLicenseKey") || "";
+            my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });
+            $ua->timeout(3);
+            my $url = "https://inout.omvky.com/api/verify?key=$key&mac=&domain=localhost&product=koha";
+            my $response = $ua->get($url);
+            
+            my $valid = 0;
+            my $reason = "no_key";
+            if ($response->is_success) {
+                my $json = JSON::decode_json($response->decoded_content);
+                if ($json->{status} && $json->{status} eq 'success') {
+                    $valid = 1;
+                } else {
+                    $reason = $json->{message} || 'Invalid';
+                }
+            } else {
+                $reason = "server_down";
+            }
+            
+            if (!$valid) {
+                print $query->redirect("/cgi-bin/koha/admin/license_expired.pl?reason=$reason");
+                exit;
+            }
+        };
+    }
+
     if ( $type eq 'opac' && !C4::Context->preference("OpacPublic") ) {
         my @allowed_scripts_for_private_opac = qw(
             opac-memberentry.tt

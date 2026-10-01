@@ -1,0 +1,61 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>AMC License Management &rsaquo; Koha</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="admin_license" class="admin">
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'prefs-admin-search.inc' %]
+
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a> &rsaquo; AMC License Management</div>
+
+<div class="main container-fluid">
+    <div class="row">
+        <div class="col-sm-10 col-sm-push-2">
+            <main>
+
+                <h1>AMC License Management</h1>
+
+                [% IF message %]
+                    <div class="dialog message">[% message | html %]</div>
+                [% END %]
+
+                <div class="page-section">
+                    <h2>Current License Status: [% license_status | html %]</h2>
+                    [% IF license_status == 'Active' %]
+                        <p><strong>Plan:</strong> [% license_plan | html %]</p>
+                        <p><strong>Expiry Date:</strong> [% license_expiry | html %]</p>
+                    [% ELSIF license_status == 'Inactive' OR license_status == 'Server Offline' %]
+                        <div class="dialog alert">
+                            <p><strong>Error:</strong> [% license_reason | html %]</p>
+                        </div>
+                    [% END %]
+                </div>
+
+                <form method="post" action="/cgi-bin/koha/admin/license.pl">
+                    <input type="hidden" name="op" value="save" />
+                    <fieldset class="rows">
+                        <legend>Update License Key</legend>
+                        <ol>
+                            <li>
+                                <label for="license_key">License Key: </label>
+                                <textarea id="license_key" name="license_key" rows="4" cols="50">[% license_key | html %]</textarea>
+                                <div class="hint">Paste your Base64 encoded AMC license key here.</div>
+                            </li>
+                        </ol>
+                    </fieldset>
+                    <fieldset class="action">
+                        <input type="submit" value="Save and Verify" class="btn btn-primary" />
+                    </fieldset>
+                </form>
+
+            </main>
+        </div>
+        <div class="col-sm-2 col-sm-pull-10">
+            <aside>
+                [% INCLUDE 'admin-menu.inc' %]
+            </aside>
+        </div>
+    </div>
+</div>
+
+[% INCLUDE 'intranet-bottom.inc' %]

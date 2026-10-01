@@ -925,5 +925,6 @@ INSERT INTO systempreferences ( `variable`, `value` ) VALUES
 ('XSLTResultsDisplay','default'),
 ('z3950AuthorAuthFields','701,702,700'),
 ('z3950NormalizeAuthor','0'),
-('z3950Status','')
+('z3950Status',''),
+('InoutLicenseKey','')
 ;

@@ -1,0 +1,44 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>AMC License Expired &rsaquo; Koha</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="admin_license" class="admin">
+[% INCLUDE 'header.inc' %]
+
+<div class="main container-fluid">
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+            <main>
+
+                <div class="dialog alert">
+                    <h1>AMC License Error</h1>
+                    <p>Your library's AMC License is not valid, meaning the administrative interface has been locked.</p>
+                    <p><strong>Reason:</strong> [% reason | html %]</p>
+                </div>
+                
+                <div class="page-section">
+                    <h3>How to unlock your system:</h3>
+                    <p>If you have recently renewed your AMC, please enter your new license key below.</p>
+                    
+                    <form method="post" action="/cgi-bin/koha/admin/license.pl">
+                        <input type="hidden" name="op" value="save" />
+                        <fieldset class="rows">
+                            <ol>
+                                <li>
+                                    <label for="license_key">New License Key: </label>
+                                    <textarea id="license_key" name="license_key" rows="4" cols="50"></textarea>
+                                </li>
+                            </ol>
+                        </fieldset>
+                        <fieldset class="action">
+                            <input type="submit" value="Unlock System" class="btn btn-primary" />
+                        </fieldset>
+                    </form>
+                </div>
+
+            </main>
+        </div>
+    </div>
+</div>
+
+[% INCLUDE 'intranet-bottom.inc' %]

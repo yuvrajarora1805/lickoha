@@ -10,6 +10,13 @@
                         >{{ $__("System preferences") }}</a
                     >
                 </li>
+                <li>
+                    <a
+                        :ref="el => templateRefs.push(el)"
+                        href="/cgi-bin/koha/admin/license.pl"
+                        >{{ $__("AMC License") }}</a
+                    >
+                </li>
             </ul>
         </template>
 
