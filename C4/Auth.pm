@@ -856,21 +856,23 @@ sub checkauth {
     if ($type eq 'intranet' && $template_name ne 'admin/license_expired.tt' && $template_name ne 'admin/license.tt') {
         eval {
             require LWP::UserAgent;
-            require JSON;
             my $key = C4::Context->preference("InoutLicenseKey") || "";
             my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });
-            $ua->timeout(3);
+            $ua->timeout(5);
             my $url = "https://inout.omvky.com/api/verify?key=$key&mac=&domain=localhost&product=koha";
             my $response = $ua->get($url);
             
             my $valid = 0;
             my $reason = "no_key";
             if ($response->is_success) {
-                my $json = JSON::decode_json($response->decoded_content);
-                if ($json->{status} && $json->{status} eq 'success') {
+                my $content = $response->decoded_content;
+                if ($content =~ /"status"\s*:\s*"success"/) {
                     $valid = 1;
                 } else {
-                    $reason = $json->{message} || 'Invalid';
+                    $reason = "Invalid License";
+                    if ($content =~ /"message"\s*:\s*"([^"]+)"/) {
+                        $reason = $1;
+                    }
                 }
             } else {
                 $reason = "server_down";

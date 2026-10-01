@@ -8,7 +8,6 @@ use C4::Output;
 use C4::Context;
 use Koha::Config::SysPrefs;
 use LWP::UserAgent;
-use JSON;
 
 my $query = new CGI;
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -51,24 +50,19 @@ my $expiry = "";
 
 if ($key) {
     my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });
-    $ua->timeout(3);
+    $ua->timeout(5);
     my $url = "https://inout.omvky.com/api/verify?key=$key&mac=&domain=localhost&product=koha";
     my $response = $ua->get($url);
     
     if ($response->is_success) {
-        eval {
-            my $json = JSON::decode_json($response->decoded_content);
-            if ($json->{status} eq 'success') {
-                $status = "Active";
-                $plan = $json->{plan};
-                $expiry = $json->{expiry_date};
-            } else {
-                $status = "Inactive";
-                $reason = $json->{message};
-            }
-        };
-        if ($@) {
-            $status = "Error Parsing Response";
+        my $content = $response->decoded_content;
+        if ($content =~ /"status"\s*:\s*"success"/) {
+            $status = "Active";
+            if ($content =~ /"plan"\s*:\s*"([^"]+)"/) { $plan = $1; }
+            if ($content =~ /"expiry_date"\s*:\s*"([^"]+)"/) { $expiry = $1; }
+        } else {
+            $status = "Inactive";
+            if ($content =~ /"message"\s*:\s*"([^"]+)"/) { $reason = $1; }
         }
     } else {
         $status = "Server Offline";
