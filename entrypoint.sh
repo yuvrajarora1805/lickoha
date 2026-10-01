@@ -49,8 +49,9 @@ EOF
     sed -i "s|<user>.*</user>|<user>${KOHA_DBUSER:-kohaadmin}</user>|g" $CONF
     sed -i "s|<pass>.*</pass>|<pass>${KOHA_DBPASS:-koha_db_password}</pass>|g" $CONF
 
-    # Populate the DB now that we are sure it's up
-    koha-create --populate-db ${INSTANCE} || true
+    # Populate the DB schema manually since koha-create --populate-db fails on remote databases
+    echo "Importing Koha database schema..."
+    koha-mysql ${INSTANCE} < /usr/share/koha/intranet/cgi-bin/installer/data/mysql/kohastructure.sql || echo "Failed to import schema, might already exist."
 
     echo "Koha instance created."
 fi
