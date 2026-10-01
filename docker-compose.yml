@@ -1,0 +1,35 @@
+services:
+  koha-db:
+    image: mariadb:10.6
+    container_name: koha_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=koha_root_password
+      - MYSQL_DATABASE=koha_library
+      - MYSQL_USER=kohaadmin
+      - MYSQL_PASSWORD=koha_db_password
+    volumes:
+      - koha_db_data:/var/lib/mysql
+
+  koha-app:
+    image: digibib/koha:latest
+    container_name: koha_app
+    depends_on:
+      - koha-db
+    ports:
+      - "3001:80"
+      - "4000:8080"
+    environment:
+      - KOHA_DBHOST=koha-db
+      - KOHA_ADMINUSER=admin
+      - KOHA_ADMINPASS=admin123
+    volumes:
+      # Mount ONLY our specific changed files into the container
+      - ./C4/Auth.pm:/usr/share/koha/lib/C4/Auth.pm
+      - ./admin/license.pl:/usr/share/koha/intranet/cgi-bin/admin/license.pl
+      - ./admin/license_expired.pl:/usr/share/koha/intranet/cgi-bin/admin/license_expired.pl
+      - ./koha-tmpl/intranet-tmpl/prog/en/modules/admin/license.tt:/usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/license.tt
+      - ./koha-tmpl/intranet-tmpl/prog/en/modules/admin/license_expired.tt:/usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/license_expired.tt
+      - ./koha-tmpl/intranet-tmpl/prog/js/vue/components/Islands/AdminMenu.vue:/usr/share/koha/intranet/htdocs/intranet-tmpl/prog/js/vue/components/Islands/AdminMenu.vue
+
+volumes:
+  koha_db_data:
