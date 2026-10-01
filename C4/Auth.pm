@@ -853,8 +853,12 @@ sub checkauth {
     $type = 'opac' unless $type;
 
     # INOUT AMC License Check (only for Intranet/Staff client)
-    if ($type eq 'intranet' && $template_name ne 'admin/license_expired.tt' && $template_name ne 'admin/license.tt') {
+    my $script_name = $ENV{'SCRIPT_NAME'} || '';
+    if ($type eq 'intranet' && $template_name ne 'admin/license_expired.tt' && $template_name ne 'admin/license.tt' && $script_name !~ m/installer|onboarding/) {
         eval {
+            # Skip if database is not fully populated yet
+            return unless C4::Context->dbh->do("SHOW TABLES LIKE 'systempreferences'");
+            
             my $key = C4::Context->preference("InoutLicenseKey") || "";
             my $url = "https://inout.omvky.com/api/verify?key=$key&mac=&domain=localhost&product=koha";
             my $content = `curl -s -k "$url" 2>/dev/null`;
