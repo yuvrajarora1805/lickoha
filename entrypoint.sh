@@ -45,6 +45,9 @@ EOF
     echo "Koha instance created."
 fi
 
+# Disable default Apache site
+a2dissite 000-default || true
+
 # Enable the site in Apache
 a2ensite ${INSTANCE} || true
 
