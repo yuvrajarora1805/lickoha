@@ -13,6 +13,7 @@ services:
   koha-app:
     build: .
     container_name: koha_app
+    privileged: true
     depends_on:
       - koha-db
     ports:

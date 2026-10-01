@@ -48,6 +48,10 @@ fi
 # Enable the site in Apache
 a2ensite ${INSTANCE} || true
 
+# Start Plack (The Koha application server backend)
+echo "Starting Plack..."
+koha-plack --start ${INSTANCE} || true
+
 # Stop apache if started by background scripts and clean up pid
 service apache2 stop || true
 rm -f /var/run/apache2/apache2.pid
