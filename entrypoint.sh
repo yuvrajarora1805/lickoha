@@ -3,8 +3,15 @@ set -e
 
 INSTANCE="library"
 
-# Wait for DB to be ready
-sleep 5
+# Start Memcached (Koha needs this)
+service memcached start || true
+
+# Wait for DB to be fully ready before proceeding
+echo "Waiting for database to be ready..."
+while ! mysqladmin ping -h"${KOHA_DBHOST:-koha-db}" -u"${KOHA_DBUSER:-kohaadmin}" -p"${KOHA_DBPASS:-koha_db_password}" --silent; do
+    sleep 2
+done
+echo "Database is up!"
 
 # Create Koha instance if it doesn't exist
 if [ ! -f "/etc/koha/sites/${INSTANCE}/koha-conf.xml" ]; then
@@ -39,7 +46,7 @@ EOF
     sed -i "s|<user>.*</user>|<user>${KOHA_DBUSER:-kohaadmin}</user>|g" $CONF
     sed -i "s|<pass>.*</pass>|<pass>${KOHA_DBPASS:-koha_db_password}</pass>|g" $CONF
 
-    # Populate the DB
+    # Populate the DB now that we are sure it's up
     koha-create --populate-db ${INSTANCE} || true
 
     echo "Koha instance created."

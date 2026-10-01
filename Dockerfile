@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && wget -qO- https://debian.koha-community.org/koha/gpg.asc \
        | gpg --dearmor > /usr/share/keyrings/koha-keyring.gpg \
     && apt-get update \
-    && apt-get install -y koha-common \
+    && apt-get install -y koha-common memcached \
     && a2enmod rewrite headers proxy_http cgi \
     && apt-get clean
 
