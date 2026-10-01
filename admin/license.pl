@@ -7,7 +7,6 @@ use C4::Auth;
 use C4::Output;
 use C4::Context;
 use Koha::Config::SysPrefs;
-use LWP::UserAgent;
 
 my $query = new CGI;
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -49,13 +48,10 @@ my $plan = "";
 my $expiry = "";
 
 if ($key) {
-    my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });
-    $ua->timeout(5);
     my $url = "https://inout.omvky.com/api/verify?key=$key&mac=&domain=localhost&product=koha";
-    my $response = $ua->get($url);
+    my $content = `curl -s -k "$url" 2>/dev/null`;
     
-    if ($response->is_success) {
-        my $content = $response->decoded_content;
+    if ($content) {
         if ($content =~ /"status"\s*:\s*"success"/) {
             $status = "Active";
             if ($content =~ /"plan"\s*:\s*"([^"]+)"/) { $plan = $1; }

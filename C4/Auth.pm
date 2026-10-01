@@ -855,17 +855,13 @@ sub checkauth {
     # INOUT AMC License Check (only for Intranet/Staff client)
     if ($type eq 'intranet' && $template_name ne 'admin/license_expired.tt' && $template_name ne 'admin/license.tt') {
         eval {
-            require LWP::UserAgent;
             my $key = C4::Context->preference("InoutLicenseKey") || "";
-            my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });
-            $ua->timeout(5);
             my $url = "https://inout.omvky.com/api/verify?key=$key&mac=&domain=localhost&product=koha";
-            my $response = $ua->get($url);
+            my $content = `curl -s -k "$url" 2>/dev/null`;
             
             my $valid = 0;
             my $reason = "no_key";
-            if ($response->is_success) {
-                my $content = $response->decoded_content;
+            if ($content) {
                 if ($content =~ /"status"\s*:\s*"success"/) {
                     $valid = 1;
                 } else {
