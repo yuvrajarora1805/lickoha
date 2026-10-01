@@ -3,6 +3,9 @@ set -e
 
 INSTANCE="library"
 
+# Wait for DB to be ready
+sleep 5
+
 # Create Koha instance if it doesn't exist
 if [ ! -f "/etc/koha/sites/${INSTANCE}/koha-conf.xml" ]; then
     echo "Creating Koha instance: ${INSTANCE}..."
@@ -23,6 +26,9 @@ USE_ZEBRA_FACETS="yes"
 KOHA_ZEBRA_PASSWORD="$(openssl rand -base64 12)"
 EOF
 
+    # Stop apache if running (koha-create tends to start it)
+    service apache2 stop || true
+
     # Create instance using external DB
     koha-create --request-db ${INSTANCE}
 
@@ -33,12 +39,18 @@ EOF
     sed -i "s|<user>.*</user>|<user>${KOHA_DBUSER:-kohaadmin}</user>|g" $CONF
     sed -i "s|<pass>.*</pass>|<pass>${KOHA_DBPASS:-koha_db_password}</pass>|g" $CONF
 
+    # Populate the DB
+    koha-create --populate-db ${INSTANCE} || true
+
     echo "Koha instance created."
 fi
 
 # Enable the site in Apache
-a2ensite ${INSTANCE}
-a2ensite ${INSTANCE}-intranet || true
+a2ensite ${INSTANCE} || true
+
+# Stop apache if started by background scripts and clean up pid
+service apache2 stop || true
+rm -f /var/run/apache2/apache2.pid
 
 # Start Apache
 echo "Starting Apache..."
