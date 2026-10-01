@@ -58,6 +58,11 @@ fi
 # Disable default Apache site
 a2dissite 000-default || true
 
+# Ensure Apache listens on 8080 for the Staff interface
+if ! grep -q "Listen 8080" /etc/apache2/ports.conf; then
+    echo "Listen 8080" >> /etc/apache2/ports.conf
+fi
+
 # Enable the site in Apache
 a2ensite ${INSTANCE} || true
 
