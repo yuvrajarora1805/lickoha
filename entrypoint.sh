@@ -7,10 +7,13 @@ INSTANCE="library"
 service memcached start || true
 
 # Wait for DB to be fully ready before proceeding
-echo "Waiting for database to be ready..."
-while ! mysqladmin ping -h"${KOHA_DBHOST:-koha-db}" -u"${KOHA_DBUSER:-kohaadmin}" -p"${KOHA_DBPASS:-koha_db_password}" --silent; do
+echo "Waiting for database port to open..."
+while ! bash -c "</dev/tcp/${KOHA_DBHOST:-koha-db}/3306" 2>/dev/null; do
     sleep 2
 done
+# Wait an extra 10 seconds for MariaDB to finish initializing its internal tables
+echo "Port open! Waiting 10s for MariaDB init..."
+sleep 10
 echo "Database is up!"
 
 # Create Koha instance if it doesn't exist
