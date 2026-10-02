@@ -67,6 +67,9 @@ fi
 # Enable the site in Apache
 a2ensite ${INSTANCE} || true
 
+# Fix permissions on log files so Plack can write to them!
+chown -R ${INSTANCE}-koha:${INSTANCE}-koha /var/log/koha/${INSTANCE} || true
+
 # Start Plack (The Koha application server backend)
 echo "Starting Plack..."
 koha-plack --start ${INSTANCE} || true
